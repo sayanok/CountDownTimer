@@ -20,6 +20,32 @@ const App: React.FC = () => {
 
   const [disabled, setDisabled] = useState(false);
 
+  const [today, setToday] = useState(new Date());
+  const [todayYear, setTodayYear] = useState(today.getFullYear());
+  const [todayMonth, setTodayMonth] = useState(today.getMonth());
+  const [todayDate, setTodayDate] = useState(today.getDate());
+  const [currentHours, setCurrentHours] = useState(today.getHours());
+  const [currentMinutes, setCurrentMinutes] = useState(today.getMinutes());
+  const [currentTime, setCurrentTime] = useState(
+    (currentHours.toString().length === 1 ? "0" + currentHours : currentHours) +
+      ":" +
+      (currentMinutes.toString().length === 1 ? "0" + currentMinutes : currentMinutes)
+  );
+
+  function setTime() {
+    setToday(new Date());
+    setTodayYear(today.getFullYear());
+    setTodayMonth(today.getMonth());
+    setTodayDate(today.getDate());
+    setCurrentHours(today.getHours());
+    setCurrentMinutes(today.getMinutes());
+    setCurrentTime(
+      (currentHours.toString().length === 1 ? "0" + currentHours : currentHours) +
+        ":" +
+        (currentMinutes.toString().length === 1 ? "0" + currentMinutes : currentMinutes)
+    );
+  }
+
   function onChangeHandler(type: string, inputContents: string) {
     if (type === "eventName") {
       eventNameValidation(inputContents);
@@ -40,14 +66,7 @@ const App: React.FC = () => {
   }
 
   function eventDateValidation(inputContents: string) {
-    const today: Date = new Date();
-    const todayYear: number = today.getFullYear();
-    const todayMonth: number = today.getMonth();
-    const todayDate: number = today.getDate();
-    const currentHours: number = today.getHours();
-    const currentMinutes: number = today.getMinutes();
-    const currentTime = currentHours + ":" + currentMinutes;
-
+    setTime();
     if (inputContents === "") {
       setEventDateErrorMessage("イベント日を入力してください");
     } else if (
@@ -69,13 +88,7 @@ const App: React.FC = () => {
   }
 
   function eventTimeValidation(inputContents: string) {
-    const today: Date = new Date();
-    const todayYear: number = today.getFullYear();
-    const todayMonth: number = today.getMonth();
-    const todayDate: number = today.getDate();
-    const currentHours: number = today.getHours();
-    const currentMinutes: number = today.getMinutes();
-    const currentTime = currentHours + ":" + currentMinutes;
+    setTime();
 
     if (inputContents === "") {
       setEventTimeErrorMessage("");
@@ -116,17 +129,24 @@ const App: React.FC = () => {
   }
 
   function setDisplayContents() {
-    const now: any = new Date();
+    const today: any = new Date();
     const eventDateTime: any = new Date(eventDate + "T" + eventTime);
-    const diff = eventDateTime - now;
+    const diff = eventDateTime - today;
 
-    if (diff !== 0) {
+    setTime();
+
+    if (
+      todayYear === new Date(eventDate).getFullYear() &&
+      todayMonth === new Date(eventDate).getMonth() &&
+      todayDate === new Date(eventDate).getDate() &&
+      currentTime >= eventTime
+    ) {
+      stopTimer();
+    } else {
       setDisplayDate(Math.floor(diff / 1000 / 60 / 60 / 24));
       setDisplayHours(Math.floor(diff / 1000 / 60 / 60) - Math.floor(Math.floor(diff / 1000 / 60 / 60 / 24)) * 24);
       setDisplayMinutes(Math.floor(diff / 1000 / 60) % 60);
       setDisplaySeconds(Math.floor(diff / 1000) % 60);
-    } else {
-      stopTimer();
     }
   }
 

@@ -16,13 +16,6 @@ const App: React.FC = () => {
   const [eventDateErrorMessage, setEventDateErrorMessage] = useState(" ");
   const [eventTimeErrorMessage, setEventTimeErrorMessage] = useState("");
 
-  const today: Date = new Date();
-  const todayYear: number = today.getFullYear();
-  const todayMonth: number = today.getMonth();
-  const todayDate: number = today.getDate();
-  const nowHours: number = today.getHours();
-  const nowMinutes: number = today.getMinutes();
-
   function onChangeHandler(type: string, inputContents: string) {
     if (type === "eventName") {
       eventNameValidation(inputContents);
@@ -43,35 +36,55 @@ const App: React.FC = () => {
   }
 
   function eventDateValidation(inputContents: string) {
+    const today: Date = new Date();
+    const todayYear: number = today.getFullYear();
+    const todayMonth: number = today.getMonth();
+    const todayDate: number = today.getDate();
+    const currentHours: number = today.getHours();
+    const currentMinutes: number = today.getMinutes();
+    const currentTime = currentHours + ":" + currentMinutes;
+
     if (inputContents === "") {
       setEventDateErrorMessage("イベント日を入力してください");
     } else if (
       !inputContents.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/) ||
-      new Date(todayYear, todayMonth, todayDate) >= new Date(inputContents)
+      new Date(todayYear, todayMonth, todayDate) > new Date(inputContents)
     ) {
       setEventDateErrorMessage("イベント日は不正な値が入力されています。正しい値を入力してください");
+    } else if (
+      todayYear === new Date(inputContents).getFullYear() &&
+      todayMonth === new Date(inputContents).getMonth() &&
+      todayDate === new Date(inputContents).getDate() &&
+      currentTime >= eventTime
+    ) {
+      setEventTimeErrorMessage("イベント時刻は不正な値が入力されています。正しい値を入力してください!!!");
+      setEventDateErrorMessage("");
     } else {
       setEventDateErrorMessage("");
     }
   }
 
   function eventTimeValidation(inputContents: string) {
-    inputContents.split(":");
-    const inputHours: string = inputContents[0];
-    const inputMinutes: string = inputContents[1];
+    const today: Date = new Date();
+    const todayYear: number = today.getFullYear();
+    const todayMonth: number = today.getMonth();
+    const todayDate: number = today.getDate();
+    const currentHours: number = today.getHours();
+    const currentMinutes: number = today.getMinutes();
+    const currentTime = currentHours + ":" + currentMinutes;
 
     if (inputContents === "") {
       setEventTimeErrorMessage("");
     } else if (!inputContents.match(/^([01][0-9]|2[0-3]):[0-5][0-9]$/)) {
-      setEventTimeErrorMessage("イベント時刻は不正な値が入力されています。正しい値を入力してください");
+      setEventTimeErrorMessage("イベント時刻は不正な値が入力されています。正しい値を入力してください!");
     } else if (
       todayYear === new Date(eventDate).getFullYear() &&
       todayMonth === new Date(eventDate).getMonth() &&
       todayDate === new Date(eventDate).getDate() &&
-      nowHours >= parseInt(inputHours) &&
-      nowMinutes > parseInt(inputMinutes)
+      currentTime >= inputContents
     ) {
-      setEventTimeErrorMessage("イベント時刻は不正な値が入力されています。正しい値を入力してください");
+      setEventTimeErrorMessage("イベント時刻は不正な値が入力されています。正しい値を入力してください!!");
+      setEventDateErrorMessage("");
     } else {
       setEventTimeErrorMessage("");
     }

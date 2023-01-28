@@ -12,9 +12,13 @@ const App: React.FC = () => {
   const [displayMinutes, setDisplayMinutes] = useState(0);
   const [displaySeconds, setDisplaySeconds] = useState(0);
 
+  const [intervalId, setIntervalId] = useState<NodeJS.Timer>();
+
   const [eventNameErrorMessage, setEventNameErrorMessage] = useState(" ");
   const [eventDateErrorMessage, setEventDateErrorMessage] = useState(" ");
   const [eventTimeErrorMessage, setEventTimeErrorMessage] = useState("");
+
+  const [disabled, setDisabled] = useState(false);
 
   function onChangeHandler(type: string, inputContents: string) {
     if (type === "eventName") {
@@ -102,7 +106,13 @@ const App: React.FC = () => {
 
   function onClickHandler() {
     setConfirmedEventName(eventName);
-    setInterval(setDisplayContents, 1000);
+    setDisabled(true);
+    setIntervalId(setInterval(setDisplayContents, 1000));
+  }
+
+  function stopTimer() {
+    clearInterval(intervalId);
+    setDisabled(false);
   }
 
   function setDisplayContents() {
@@ -110,27 +120,36 @@ const App: React.FC = () => {
     const eventDateTime: any = new Date(eventDate + "T" + eventTime);
     const diff = eventDateTime - now;
 
-    setDisplayDate(Math.floor(diff / 1000 / 60 / 60 / 24));
-    setDisplayHours(Math.floor(diff / 1000 / 60 / 60) - Math.floor(Math.floor(diff / 1000 / 60 / 60 / 24)) * 24);
-    setDisplayMinutes(Math.floor(diff / 1000 / 60) % 60);
-    setDisplaySeconds(Math.floor(diff / 1000) % 60);
+    if (diff !== 0) {
+      setDisplayDate(Math.floor(diff / 1000 / 60 / 60 / 24));
+      setDisplayHours(Math.floor(diff / 1000 / 60 / 60) - Math.floor(Math.floor(diff / 1000 / 60 / 60 / 24)) * 24);
+      setDisplayMinutes(Math.floor(diff / 1000 / 60) % 60);
+      setDisplaySeconds(Math.floor(diff / 1000) % 60);
+    } else {
+      stopTimer();
+    }
   }
 
   return (
     <>
       <div>
         イベント名
-        <input type={"text"} onChange={(e) => onChangeHandler("eventName", e.target.value)} />
+        <input type={"text"} onChange={(e) => onChangeHandler("eventName", e.target.value)} disabled={disabled} />
         <p>{eventNameErrorMessage}</p>
       </div>
       <div>
         イベント日
-        <input type={"date"} onChange={(e) => onChangeHandler("eventDate", e.target.value)} />
+        <input type={"date"} onChange={(e) => onChangeHandler("eventDate", e.target.value)} disabled={disabled} />
         <p>{eventDateErrorMessage}</p>
       </div>
       <div>
         イベント時間
-        <input type={"time"} onChange={(e) => onChangeHandler("eventTime", e.target.value)} value={eventTime} />
+        <input
+          type={"time"}
+          onChange={(e) => onChangeHandler("eventTime", e.target.value)}
+          value={eventTime}
+          disabled={disabled}
+        />
         <p>{eventTimeErrorMessage}</p>
       </div>
       <button
@@ -141,6 +160,7 @@ const App: React.FC = () => {
       >
         カウントダウン開始
       </button>
+      <button onClick={() => stopTimer()}>停止</button>
       <div>
         {confirmedEventName}まであと{displayDate}日{displayHours}:{displayMinutes}:{displaySeconds}
       </div>
